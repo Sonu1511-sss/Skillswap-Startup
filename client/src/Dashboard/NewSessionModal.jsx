@@ -5,7 +5,6 @@ import { toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 
 export default function NewSessionModal({ isOpen, onClose, activeSwaps, onSessionCreated,defaultSwapId  }) {
-  // State for the form inputs
   const [swapId, setSwapId] = useState(defaultSwapId ||activeSwaps[0]?._id || '');
   const [title, setTitle] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
@@ -41,8 +40,8 @@ export default function NewSessionModal({ isOpen, onClose, activeSwaps, onSessio
       }
 
       toast.success('Session created successfully!');
-      onSessionCreated(data.data); // Pass the new session back to the parent
-      onClose(); // Close the modal
+      onSessionCreated(data.data); 
+      onClose(); 
     } catch (error) {
       toast.error(error.message);
       console.error("Error creating session:", error);

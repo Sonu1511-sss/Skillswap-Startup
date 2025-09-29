@@ -53,7 +53,6 @@ export const updateUserProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
-// Update fields if they are provided in the request body
     user.name = name || user.name;
     user.location = location || user.location;
     user.skillsOffered = skillsOffered || user.skillsOffered;
@@ -65,7 +64,6 @@ export const updateUserProfile = async (req, res) => {
 
     const updatedUser = await user.save();
     
-// Send back user data without the password
     const userResponse = updatedUser.toObject();
     delete userResponse.password;
 

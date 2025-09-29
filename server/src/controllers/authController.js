@@ -6,15 +6,11 @@ import bcrypt from 'bcryptjs';
 import 'dotenv/config';
 
 //~---------- SignUp Controller -----------------
-// In server/src/controllers/authController.js
 
 export const SignUp = async (req, res) => {
     try {
-        // location is now optional, so it might be undefined
         const { name, email, password, location } = req.body;
 
-        // --- THE FIX IS HERE ---
-        // We remove 'location' from the required fields check
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: "Please provide name, email, and password." });
         }
@@ -26,7 +22,6 @@ export const SignUp = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Mongoose will simply ignore 'location' if it's undefined
         const newUser = await User.create({
             name,
             email,
@@ -34,7 +29,6 @@ export const SignUp = async (req, res) => {
             location,
         });
 
-        // ... the rest of the function remains the same ...
         const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.cookie("token", token, {
@@ -60,7 +54,10 @@ export const SignUp = async (req, res) => {
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
+
 //~---------- Login Controller -----------------
+
 export const Login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -77,12 +74,11 @@ export const Login = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        // --- THE FIX IS HERE ---
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Correctly handles http vs https
+            secure: process.env.NODE_ENV === 'production', 
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            sameSite: 'lax', // Use 'lax' for development and general use
+            sameSite: 'lax', 
         });
 
         const userResponse = user.toObject();
@@ -92,7 +88,7 @@ export const Login = async (req, res) => {
             success: true,
             message: "Login Successful",
             token,
-            user: userResponse // <-- Send the complete user object
+            user: userResponse 
         });
 
        
@@ -105,8 +101,6 @@ export const Login = async (req, res) => {
 
 //~---------- LogOut Controller -----------------
 export const Logout = async (req, res) => {
-    // --- THE FIX IS HERE ---
-    // The options for clearing a cookie must match the options used to set it.
     res.clearCookie('token', {
         httpOnly: true,
         sameSite: 'lax',

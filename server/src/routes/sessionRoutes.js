@@ -9,9 +9,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/me', getMySessions);
-
 router.post('/', createSession);
-
 router.put('/:id', updateSession);
 router.delete('/:id', deleteSession);
 

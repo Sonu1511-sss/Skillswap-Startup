@@ -3,15 +3,12 @@
 import React, { useState, useContext } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from 'react-hot-toast';
-import { AuthContext } from "../context/AuthContext"; // 1. Import the AuthContext
+import { AuthContext } from "../context/AuthContext"; 
 
-// 2. Renamed the 'swap' prop to 'userToSwapWith' for clarity
 export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
   
-  // 3. Get the logged-in user's data from the context
   const { user: loggedInUser } = useContext(AuthContext);
 
-  // 4. State for the form fields
   const [skillOffered, setSkillOffered] = useState(loggedInUser?.skillsOffered[0] || "");
   const [skillWanted, setSkillWanted] = useState(userToSwapWith?.skillsOffered[0] || "");
   const [message, setMessage] = useState("");
@@ -20,13 +17,12 @@ export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
 
   if (!isOpen) return null;
 
-  // 5. The real handleSubmit function with the API call
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const bodyData = {
-      receiverId: userToSwapWith.id, // The ID of the user we are sending the request to
+      receiverId: userToSwapWith.id, 
       skillOffered,
       skillWanted,
       message,
@@ -37,7 +33,7 @@ export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
       const res = await fetch('/api/swaps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Sends our login cookie
+        credentials: 'include', 
         body: JSON.stringify(bodyData),
       });
 
@@ -48,7 +44,7 @@ export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
       }
 
       toast.success(data.message);
-      onClose(); // Close the modal on success
+      onClose(); 
     } catch (error) {
       toast.error(error.message);
       console.error("Swap request error:", error);
@@ -72,7 +68,6 @@ export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
             <input type="text" value={userToSwapWith.name} readOnly className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed"/>
           </div>
 
-          {/* 6. NEW: Dropdown for selecting a skill to offer */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Skill I'll Offer</label>
             <select
@@ -87,7 +82,6 @@ export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
             </select>
           </div>
 
-          {/* 7. NEW: Dropdown for selecting a skill you want */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Skill I Want</label>
             <select

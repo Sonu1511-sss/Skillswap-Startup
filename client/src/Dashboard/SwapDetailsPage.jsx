@@ -1,14 +1,14 @@
 // client/src/Dashboard/SwapDetailsPage.jsx
 
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useParams, Link, useNavigate } from 'react-router-dom'; 
 import { AuthContext } from '../context/AuthContext';
 import { FaArrowLeft, FaCalendarPlus } from 'react-icons/fa';
 
 export default function SwapDetailsPage() {
   const { swapId } = useParams();
   const { user: loggedInUser } = useContext(AuthContext);
-  const navigate = useNavigate(); // 2. Initialize the navigate function
+  const navigate = useNavigate(); 
   
   const [swap, setSwap] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,6 @@ export default function SwapDetailsPage() {
     fetchSwapDetails();
   }, [swapId]);
 
-  // 3. Create a handler function for the button click
   const handleScheduleClick = () => {
     navigate('/dashboard/schedule', { state: { swapToScheduleId: swap._id } });
   };
@@ -63,14 +62,12 @@ export default function SwapDetailsPage() {
         <div className="border-t my-6"></div>
         
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Requester Info */}
           <div>
             <h3 className="font-bold text-lg mb-2">You are Offering:</h3>
             <p className="text-2xl text-blue-600 font-light">{swap.skillOffered}</p>
             <p className="text-sm text-gray-500">From: {swap.requester.name}</p>
           </div>
 
-          {/* Receiver Info */}
           <div>
             <h3 className="font-bold text-lg mb-2">You are Requesting:</h3>
             <p className="text-2xl text-indigo-600 font-light">{swap.skillWanted}</p>
@@ -84,7 +81,6 @@ export default function SwapDetailsPage() {
         </div>
 
         <div className="flex justify-end mt-8">
-          {/* 4. Add the onClick handler to the button */}
           <button 
             onClick={handleScheduleClick}
             className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg shadow hover:bg-indigo-700 transition"

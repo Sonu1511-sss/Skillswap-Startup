@@ -4,12 +4,8 @@ import Session from '../models/Session.js';
 import SkillSwap from '../models/SkillSwapModel.js';
 import User from '../models/UserModel.js';
 
+//-------------------------- CreateSession--------------------------------
 
-/**
- * @desc    Create a new session for an accepted skill swap
- * @route   POST /api/sessions
- * @access  Private
- */
 export const createSession = async (req, res) => {
   try {
     const { swapId, title, scheduledAt, durationInMinutes, meetingLink } = req.body;
@@ -20,7 +16,6 @@ export const createSession = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Sessions can only be created for accepted swaps.' });
     }
 
-    // Authorization: Check if the logged-in user is part of the swap
     const isParticipant = swap.requester.toString() === userId || swap.receiver.toString() === userId;
     if (!isParticipant) {
       return res.status(403).json({ success: false, message: 'You are not authorized to schedule a session for this swap.' });
@@ -52,17 +47,13 @@ export const createSession = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all sessions for the logged-in user (can be filtered by date)
- * @route   GET /api/sessions/me
- * @access  Private
- */
+
+//-------------------------- getMySession----------------------------------
+
 export const getMySessions = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Allow filtering by date range for the calendar view
-    // Example: GET /api/sessions/me?startDate=2025-09-01&endDate=2025-09-30
     const { startDate, endDate } = req.query;
     
     let filter = { participants: userId };
@@ -91,6 +82,7 @@ export const getMySessions = async (req, res) => {
   }
 };
 
+//-------------------------- updateSession --------------------------------
 
 export const updateSession = async (req, res) => {
   try {
@@ -117,10 +109,7 @@ export const updateSession = async (req, res) => {
     }
 
     session.status = status;
-    await session.save(); // Save the changes to the database
-
-    // --- THIS IS THE FIX ---
-    // After saving, find the session again and populate it fully before sending the response
+    await session.save(); 
     const populatedSession = await Session.findById(sessionId)
       .populate({
         path: 'swapId',
@@ -130,7 +119,6 @@ export const updateSession = async (req, res) => {
         ]
       });
 
-    // If the session is completed, update the learning hours for both users
     if (status === 'completed' && session.durationInMinutes > 0) {
       const hours = session.durationInMinutes / 60;
       await User.updateMany(
@@ -139,7 +127,6 @@ export const updateSession = async (req, res) => {
       );
     }
 
-    // Send the fully populated session back to the frontend
     res.status(200).json({ success: true, data: populatedSession, message: `Session marked as ${status}` });
   } catch (error) {
     console.error("Error updating session:", error);
@@ -148,28 +135,26 @@ export const updateSession = async (req, res) => {
 };
 
 
+//-------------------------- deleteSession --------------------------------
+
 export const deleteSession = async (req, res) => {
   try {
     const sessionId = req.params.id;
     const userId = req.user.id;
 
-    // 1. Find the session to ensure it exists
     const session = await Session.findById(sessionId);
 
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found.' });
     }
 
-    // 2. Authorization: Check if the logged-in user is a participant
     const isParticipant = session.participants.includes(userId);
     if (!isParticipant) {
       return res.status(403).json({ success: false, message: 'You are not authorized to delete this session.' });
     }
 
-    // 3. Delete the session
     await Session.findByIdAndDelete(sessionId);
 
-    // 4. Send a success response
     res.status(200).json({ success: true, message: 'Session deleted successfully.' });
 
   } catch (error) {

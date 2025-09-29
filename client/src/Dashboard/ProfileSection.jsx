@@ -4,29 +4,23 @@ import React, { useState, useEffect } from "react";
 import { Save, X, Upload, Plus, XCircle } from "lucide-react";
 
 const ProfileSection = ({ user, onUpdate }) => {
-  // State to hold the form data we are editing
   const [editedProfile, setEditedProfile] = useState({
     ...user,
-    // Ensure these fields are always arrays to prevent errors
     skillsOffered: Array.isArray(user.skillsOffered) ? user.skillsOffered : [],
     skillsWanted: Array.isArray(user.skillsWanted) ? user.skillsWanted : [],
     availability: Array.isArray(user.availability) ? user.availability : [],
   });
 
-  // State for the image file itself
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(user.profilePicture || null);
 
-  // State for the temporary text in the skill input fields
   const [skillOfferedInput, setSkillOfferedInput] = useState("");
   const [skillWantedInput, setSkillWantedInput] = useState("");
 
-  // Handler for regular text inputs like location, github, etc.
   const handleChange = (e) => {
     setEditedProfile((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // --- NEW: Handlers for adding/removing skills ---
   const handleAddSkill = (skillType) => {
     const skillToAdd = skillType === 'offered' ? skillOfferedInput.trim() : skillWantedInput.trim();
     if (skillToAdd && !editedProfile[skillType === 'offered' ? 'skillsOffered' : 'skillsWanted'].includes(skillToAdd)) {
@@ -34,7 +28,6 @@ const ProfileSection = ({ user, onUpdate }) => {
         ...prev,
         [skillType === 'offered' ? 'skillsOffered' : 'skillsWanted']: [...prev[skillType === 'offered' ? 'skillsOffered' : 'skillsWanted'], skillToAdd]
       }));
-      // Clear the input field
       skillType === 'offered' ? setSkillOfferedInput("") : setSkillWantedInput("");
     }
   };
@@ -46,7 +39,6 @@ const ProfileSection = ({ user, onUpdate }) => {
     }));
   };
 
-  // --- NEW: Handler for availability buttons ---
   const handleAvailabilityToggle = (option) => {
     setEditedProfile((prev) => {
       const currentAvailability = prev.availability || [];
@@ -60,13 +52,12 @@ const ProfileSection = ({ user, onUpdate }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file); // Store the actual file
-      setPreviewImage(URL.createObjectURL(file)); // Set the preview
+      setImageFile(file); 
+      setPreviewImage(URL.createObjectURL(file)); 
     }
   };
 
   const handleSave = () => {
-    // Pass both the text data and the image file to the parent
     onUpdate(editedProfile, imageFile);
   };
   
@@ -127,7 +118,6 @@ const ProfileSection = ({ user, onUpdate }) => {
   );
 };
 
-/* Reusable Field Component */
 const Field = ({ label, name, value, onChange, placeholder }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
@@ -135,7 +125,6 @@ const Field = ({ label, name, value, onChange, placeholder }) => (
   </div>
 );
 
-/* NEW Reusable Skill Input Component */
 const SkillInput = ({ label, value, onChange, onAdd, skills, onRemove, color }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>

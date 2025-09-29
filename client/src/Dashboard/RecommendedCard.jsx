@@ -3,7 +3,6 @@
 import React from 'react';
 import { FaStar, FaCheckCircle } from "react-icons/fa";
 
-// 1. Receive the new 'onSendRequest' prop
 const RecommendedCard = ({ user, onSendRequest }) => (
   <div className="bg-white rounded-lg p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm hover:shadow-lg transition duration-300 border">
     <img src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.name}&background=random`} alt={user.name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white ring-2 ring-gray-200"/>

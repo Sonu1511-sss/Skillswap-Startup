@@ -9,7 +9,6 @@ import ReviewModal from "./ReviewModal";
 import { toast } from "react-hot-toast";
 
 export default function Schedule() {
-  // --- STATE MANAGEMENT ---
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

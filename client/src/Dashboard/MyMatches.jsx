@@ -5,7 +5,7 @@ import { FaStar, FaCheckCircle, FaCommentDots, FaTimesCircle, FaHistory } from "
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import RequestModal from "./RequestModal"; // Make sure this is imported
+import RequestModal from "./RequestModal"; 
 
 const tabs = ["Recommended", "Active Swaps", "Requests", "History"];
 
@@ -144,7 +144,6 @@ const RecommendedCard = ({ user, onSendRequest }) => (
         <div><span className="font-semibold text-gray-600">Wants:</span> {user.skillsWanted.join(", ")}</div>
       </div>
     </div>
-    {/* --- UPDATED: Added onClick to the button --- */}
     <button onClick={() => onSendRequest(user)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow flex-shrink-0">Send Request</button>
   </div>
 );
@@ -161,8 +160,6 @@ const ActiveSwapCard = ({ swap, currentUser }) => {
       <div className="flex gap-2 mt-4">
         <button className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition">Chat</button>
         
-        {/* --- THIS IS THE ONLY CHANGE --- */}
-        {/* 2. The button is now a Link that navigates to the details page */}
         <Link 
           to={`/dashboard/swaps/${swap._id}`} 
           className="bg-gray-200 text-gray-700 px-4 py-2 text-sm rounded-lg hover:bg-gray-300 transition text-center"
