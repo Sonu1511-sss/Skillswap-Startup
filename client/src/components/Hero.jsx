@@ -1,12 +1,32 @@
-import React from "react";
+// client/src/components/Hero.jsx
+
+import React, { useContext } from "react"; 
 import { motion } from "framer-motion";
-import HeroImage from "../assids/Hero-logo.png"; // Replace with your image path
+import HeroImage from "../assids/Hero-logo.png"; 
+import { useNavigate, useOutletContext } from "react-router-dom"; 
+import { AuthContext } from "../context/AuthContext"; 
 
 export default function Hero() {
+  
+  const { user } = useContext(AuthContext);
+
+  const { onLoginClick } = useOutletContext();
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (user) {
+      // If user is logged in, go to dashboard
+      navigate("/dashboard");
+    } else {
+      // If user is NOT logged in, open the login modal
+      onLoginClick();
+    }
+  };
+
   return (
     <section className="relative bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white min-h-[35rem] md:min-h-[39rem] flex items-start md:items-center pt-[9rem] md:pt-0">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center px-4 md:px-8 w-full">
-        
         {/* Text Section */}
         <motion.div
           initial={{ x: -100, opacity: 0 }}
@@ -24,10 +44,12 @@ export default function Hero() {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-4 justify-center md:justify-start">
+            {/* 8. The button now uses our smart handleClick function */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-6 py-3 rounded-xl bg-white text-blue-600 font-semibold shadow-lg transition hover:shadow-xl"
+              onClick={handleClick}
             >
               Get Started
             </motion.button>

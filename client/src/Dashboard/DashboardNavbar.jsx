@@ -1,51 +1,64 @@
-import React, { useState, useEffect } from "react";
+// client/src/Dashboard/DashboardNavbar.jsx
+
+import React, { useState, useContext } from 'react';
+import { NavLink, useNavigate } from "react-router-dom";
+import { AuthContext } from '../context/AuthContext';
 import { FaBell, FaEnvelope, FaChevronDown } from "react-icons/fa";
-
-export default function DashboardNavbar({ setActivePage }) {
-  const [scrolled, setScrolled] = useState(false);
+import { toast } from 'react-hot-toast';
+import logo from '../assids/Skillswap-logo.png';
+export default function DashboardNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
+
+  //...........................Profile Menu.............................................
   const profileMenu = [
-    { name: "Dashboard", page: "dashboard" },
-    { name: "Browse Skills", page: "browseSkills" },
-    { name: "My Matches", page: "myMatches" },
-    { name: "Messages", page: "messages" },
-    { name: "Schedule", page: "schedule" },
-    { name: "Progress", page: "progress" },
-    { name: "Achievements", page: "achievements" },
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Profile", path: "/dashboard/profile" },
+    { name: "Browse Skills", path: "/dashboard/browse-skills" },
+    { name: "My Matches", path: "/dashboard/my-matches" },
+    { name: "Messages", path: "/dashboard/messages" },
+    { name: "Schedule", path: "/dashboard/schedule" },
+    { name: "Achievements", path: "/dashboard/Achivements" },
   ];
 
-  const menuItems = [
-    { name: "How It Works", page: "howItWorks" },
-    { name: "Features", page: "features" },
-    { name: "Process Flow", page: "processFlow" },
-    { name: "About Us", page: "aboutUs" },
-  ];
+  //...........................Logout Function.............................................
+  const handleLogout = async () => {
+    console.log("1. Logout button CLICKED in DashboardNavbar!");
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      logout();
+      toast.success("Logged out successfully!");
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed", error);
+      toast.error("Logout failed.");
+    }
+  };
+
+  //...........................Get User Initials.............................................
+
+  const getUserInitials = (name) => {
+    if (!name) return "";
+    const nameParts = name.split(" ");
+    return nameParts.length > 1
+      ? `${nameParts[0][0]}${nameParts[1][0]}`
+      : `${nameParts[0][0]}`;
+  };
+
+  const navLinkStyles = "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 w-full text-left";
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-lg border-b" : "bg-gray-50 border-b"
-      }`}
-    >
+    <nav className="fixed top-0 w-full z-50 bg-white shadow-lg border-b">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-2 md:px-4 py-1 md:py-2">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-         <a href="/"><img
-            src="./src/assids/Skillswap-logo.png"
-            className="h-[3.5rem] md:h-[4rem] w-auto"
-            alt="logo"
-          /></a> 
-        </div>
+        <NavLink to="/"><img
+          src={logo}
+          className="h-[3.5rem] md:h-[4rem] w-auto"
+          alt="logo"
+        /></NavLink>
 
-        {/* Search */}
         <div className="flex-1 px-4">
           <input
             type="text"
@@ -54,86 +67,50 @@ export default function DashboardNavbar({ setActivePage }) {
           />
         </div>
 
-        {/* Right Icons */}
         <div className="flex items-center gap-4 relative">
           <FaEnvelope className="text-gray-700 cursor-pointer text-xl hover:text-blue-600 transition" />
           <FaBell className="text-gray-700 cursor-pointer text-xl hover:text-blue-600 transition" />
 
-          {/* Profile */}
-          <div className="relative">
-            <div
-              className="flex items-center gap-1 cursor-pointer"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-2 border-gray-300 hover:border-blue-500 transition">
-                <span>SU</span>
+          {/* 3. This 'user' is now guaranteed to be the global, correct user */}
+          {user && (
+            <div className="relative">
+              <div
+                className="flex items-center gap-1 cursor-pointer"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center border-2 border-gray-300 hover:border-blue-500 transition">
+                  <span>{getUserInitials(user.name)}</span>
+                </div>
+                <FaChevronDown className="text-gray-700" />
               </div>
-              <FaChevronDown className="text-gray-700" />
-            </div>
 
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md z-50">
-                {profileMenu.map((item, i) => (
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-md z-50">
+                  <div className="p-4 border-b">
+                    <p className="font-bold">{user.name}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  {profileMenu.map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      className={navLinkStyles}
+                      onClick={() => setDropdownOpen(false)}
+                      end={item.path === "/dashboard"}
+                    >
+                      {item.name}
+                    </NavLink>
+                  ))}
                   <button
-                    key={i}
-                    className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 w-full text-left"
-                    onClick={() => {
-                      setActivePage(item.page);
-                      setDropdownOpen(false);
-                    }}
+                    onClick={handleLogout}
+                    className={`${navLinkStyles} border-t`}
                   >
-                    {item.name}
+                    Logout
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Hamburger */}
-        <button
-          className="md:hidden focus:outline-none p-2 rounded hover:bg-gray-200 transition text-gray-800"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d={
-                mobileOpen
-                  ? "M6 18L18 6M6 6l12 12"
-                  : "M4 6h16M4 12h16M4 18h16"
-              }
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          mobileOpen ? "max-h-[35rem] opacity-100 py-4" : "max-h-0 opacity-0"
-        } bg-white shadow border-t border-gray-200`}
-      >
-        <div className="flex flex-col items-center justify-center space-y-2">
-          {menuItems.map((item, i) => (
-            <button
-              key={i}
-              className="p-4 w-full text-center border-b border-gray-200 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition"
-              onClick={() => {
-                setActivePage(item.page);
-                setMobileOpen(false);
-              }}
-            >
-              {item.name}
-            </button>
-          ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </nav>

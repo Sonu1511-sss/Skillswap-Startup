@@ -1,68 +1,105 @@
-// RequestModal.jsx
-import React, { useState } from "react";
-import { FaTimes } from "react-icons/fa";
+// client/src/Dashboard/RequestModal.jsx
 
-export default function RequestModal({ isOpen, onClose, swap }) {
+import React, { useState, useContext } from "react";
+import { FaTimes } from "react-icons/fa";
+import { toast } from 'react-hot-toast';
+import { AuthContext } from "../context/AuthContext"; // 1. Import the AuthContext
+
+// 2. Renamed the 'swap' prop to 'userToSwapWith' for clarity
+export default function RequestModal({ isOpen, onClose, userToSwapWith }) {
+  
+  // 3. Get the logged-in user's data from the context
+  const { user: loggedInUser } = useContext(AuthContext);
+
+  // 4. State for the form fields
+  const [skillOffered, setSkillOffered] = useState(loggedInUser?.skillsOffered[0] || "");
+  const [skillWanted, setSkillWanted] = useState(userToSwapWith?.skillsOffered[0] || "");
   const [message, setMessage] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  // 5. The real handleSubmit function with the API call
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(
-      `Swap request sent to ${swap.name}!\n\nMessage: ${message}\nPreferred Time: ${preferredTime}`
-    );
-    setMessage("");
-    setPreferredTime("");
-    onClose();
+    setLoading(true);
+
+    const bodyData = {
+      receiverId: userToSwapWith.id, // The ID of the user we are sending the request to
+      skillOffered,
+      skillWanted,
+      message,
+      preferredTime,
+    };
+
+    try {
+      const res = await fetch('/api/swaps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Sends our login cookie
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to send request.');
+      }
+
+      toast.success(data.message);
+      onClose(); // Close the modal on success
+    } catch (error) {
+      toast.error(error.message);
+      console.error("Swap request error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 relative shadow-lg">
-        {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-          onClick={onClose}
-        >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-lg">
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>
           <FaTimes size={20} />
         </button>
 
         <h2 className="text-xl font-bold mb-4">Request Skill Swap</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Swap With (Read-only) */}
           <div>
             <label className="block text-gray-700 font-medium mb-1">Swap With</label>
-            <input
-              type="text"
-              value={swap.name}
-              readOnly
-              className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed"
-            />
+            <input type="text" value={userToSwapWith.name} readOnly className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed"/>
           </div>
 
-          {/* Skills Offered (Read-only) */}
+          {/* 6. NEW: Dropdown for selecting a skill to offer */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Skills Offered</label>
-            <input
-              type="text"
-              value={swap.skillsOffer.join(", ")}
-              readOnly
-              className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed"
-            />
+            <label className="block text-gray-700 font-medium mb-1">Skill I'll Offer</label>
+            <select
+              value={skillOffered}
+              onChange={(e) => setSkillOffered(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            >
+              {loggedInUser?.skillsOffered.map(skill => (
+                <option key={skill} value={skill}>{skill}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Skills Wanted (Read-only) */}
+          {/* 7. NEW: Dropdown for selecting a skill you want */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Skills Wanted</label>
-            <input
-              type="text"
-              value={swap.skillsWant.join(", ")}
-              readOnly
-              className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed"
-            />
+            <label className="block text-gray-700 font-medium mb-1">Skill I Want</label>
+            <select
+              value={skillWanted}
+              onChange={(e) => setSkillWanted(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            >
+              {userToSwapWith?.skillsOffered.map(skill => (
+                <option key={skill} value={skill}>{skill}</option>
+              ))}
+            </select>
           </div>
 
           {/* Message */}
@@ -70,11 +107,11 @@ export default function RequestModal({ isOpen, onClose, swap }) {
             <label className="block text-gray-700 font-medium mb-1">Message</label>
             <textarea
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Write your message..."
+              placeholder="Write a friendly message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               required
-              rows={4}
+              rows={3}
             />
           </div>
 
@@ -87,16 +124,15 @@ export default function RequestModal({ isOpen, onClose, swap }) {
               placeholder="E.g., Weekends, Evenings"
               value={preferredTime}
               onChange={(e) => setPreferredTime(e.target.value)}
-              required
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            Send Swap Request
+            {loading ? 'Sending...' : 'Send Swap Request'}
           </button>
         </form>
       </div>

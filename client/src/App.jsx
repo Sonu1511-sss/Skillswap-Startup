@@ -1,40 +1,55 @@
+// client/src/App.jsx
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+
+// Import Layouts (Frames)
+import MainLayout from "./layouts/MainLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+
+// Import Pages (Pictures)
+import Home from "./pages/Home";
+import AboutUs from "./components/AboutUs";
+import Features from "./components/Features";
 import HowItWorks from "./components/HowItWorks";
 import ProcessFlow from "./components/ProcessFlow";
-import Home from "./pages/Home";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import AboutUs from "./components/AboutUs";
-import GettingStarted from "./components/Features";
-import Register from "./components/Register";
-import DashboardNavbar from "./Dashboard/DashboardNavbar";
 import DashboardWelcome from "./Dashboard/DashboardWelcome";
 import BrowseSkills from "./Dashboard/BrowseSkills";
-import Dashboard from "./Dashboard/Dashobard";
 import MyMatches from "./Dashboard/MyMatches";
 import Messages from "./Dashboard/Message";
+import Achievements from "./Dashboard/Achievements";
+import Schedule from "./Dashboard/Schedule";
+import ProfilePage from './pages/ProfilePage';
+import SwapDetailsPage from './Dashboard/SwapDetailsPage';
+// ... other pages
 
 function App() {
   return (
-    <div>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
+    <Routes>
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<Home />} />
+        <Route path="about-us" element={<AboutUs />} />
+        <Route path="features" element={<Features />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/features" element={<GettingStarted />} />
         <Route path="/process-flow" element={<ProcessFlow />} />
-        <Route path="/about-Us" element={<AboutUs />} />
-        <Route path="/Sign-In" element={<Register />} />
-        <Route path="/dashboard-nav" element={<DashboardNavbar />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard-wel" element={<DashboardWelcome />} />
-        <Route path="/BrowseSkills" element={<BrowseSkills />} />
-        <Route path="/MyMatches" element={<MyMatches />} />
-        <Route path="/msg" element={<Messages />} />
-      </Routes>
-      <Footer />
-    </div>
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<DashboardWelcome />} />
+          <Route path="browse-skills" element={<BrowseSkills />} />
+          <Route path="my-matches" element={<MyMatches />} />
+           <Route path="profile" element={<ProfilePage />} /> 
+          <Route path="messages" element={<Messages />} />
+          <Route path="swaps/:swapId" element={<SwapDetailsPage />} />
+          <Route path="Achivements" element={<Achievements />} />
+          <Route path="schedule" element={<Schedule />} />
+        </Route>
+      </Route>
+        <Route path="*" element={<h1>404: Page Not Found</h1>} />
+    </Routes>
   );
 }
 

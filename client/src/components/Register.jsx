@@ -14,41 +14,41 @@ export default function RegisterModal({ onClose, onLoginSuccess }) {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+//...............................handleSubmit function ..................................
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const url = isRegister ? "/api/users/register" : "/api/users/login";
+// .....................The backend endpoint URLs are now the same as in your router......
+    const url = isRegister ? "/api/auth/signup" : "/api/auth/login";
+    
+    const bodyData = isRegister
+      ? formData
+      : { email: formData.email, password: formData.password };
 
     try {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(bodyData),
+        credentials: "include",
       });
 
-      // Safe JSON parsing
-      let data;
-      const text = await res.text();
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error("Invalid server response");
+      const data = await res.json(); 
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong");
       }
+      
+     
 
-      if (!res.ok) throw new Error(data.message || "Something went wrong");
-
-      // Save token and user
-      localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      toast.success(
-        isRegister ? "Registered successfully!" : "Logged in successfully!"
-      );
-      onLoginSuccess(); // Notify parent
-      onClose(); // Close modal
+      toast.success(data.message);
+      
+      onLoginSuccess(); // Notify parent component that login was successful
+      onClose(); // Close the modal
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
