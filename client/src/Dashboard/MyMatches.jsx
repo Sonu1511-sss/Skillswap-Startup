@@ -1,11 +1,11 @@
 // client/src/Dashboard/MyMatches.jsx
 
 import React, { useState, useEffect, useMemo, useContext } from "react";
-import { FaStar, FaCheckCircle, FaCommentDots, FaTimesCircle, FaHistory } from "react-icons/fa";
+import { FaStar, FaCheckCircle, FaCommentDots, FaTimesCircle, FaHistory, FaMapMarkerAlt } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { Link } from "react-router-dom";
-import RequestModal from "./RequestModal"; 
+import { Link, useNavigate } from "react-router-dom";
+import RequestModal from "./RequestModal";
 
 const tabs = ["Recommended", "Active Swaps", "Requests", "History"];
 
@@ -15,36 +15,24 @@ export default function MyMatches() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // --- ADDED: State to manage the request modal ---
   const [activeModal, setActiveModal] = useState(null);
-  const { user: loggedInUser } = useContext(AuthContext);
+  const { user: loggedInUser ,fetchUnreadRequestCount  } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // --- UPDATED: Fetch data concurrently with Promise.all for better performance ---
         const [swapsRes, usersRes] = await Promise.all([
           fetch('/api/swaps/me', { credentials: 'include' }),
           fetch('/api/users', { credentials: 'include' })
         ]);
-
         const swapsData = await swapsRes.json();
-        if (swapsData.success) {
-          setSwaps(swapsData.data);
-        } else {
-          throw new Error(swapsData.message || 'Failed to fetch swaps');
-        }
-
+        if (swapsData.success) setSwaps(swapsData.data);
+        else throw new Error(swapsData.message || 'Failed to fetch swaps');
         const usersData = await usersRes.json();
-        if (usersData.success) {
-          setUsers(usersData.data);
-        } else {
-          throw new Error(usersData.message || 'Failed to fetch users');
-        }
-
+        if (usersData.success) setUsers(usersData.data);
+        else throw new Error(usersData.message || 'Failed to fetch users');
       } catch (err) {
         setError(err.message);
         console.error(err);
@@ -55,12 +43,29 @@ export default function MyMatches() {
     fetchData();
   }, []);
 
-  // Filtering logic is the same (and perfect)
+   useEffect(() => {
+        const markAsRead = async () => {
+            // If the user is viewing the requests and there are unread ones
+            if (activeTab === 'Requests' && unreadRequestCount > 0) {
+                try {
+                    await fetch('/api/swaps/read-requests', {
+                        method: 'PUT',
+                        credentials: 'include'
+                    });
+                    // Refresh the count in the navbar (it should become 0)
+                    fetchUnreadRequestCount();
+                } catch (error) {
+                    console.error("Failed to mark requests as read", error);
+                }
+            }
+        };
+        markAsRead();
+    }, [activeTab]); 
+
   const activeSwaps = useMemo(() => swaps.filter(s => s.status === 'accepted'), [swaps]);
   const pendingRequests = useMemo(() => swaps.filter(s => s.status === 'pending'), [swaps]);
   const swapHistory = useMemo(() => swaps.filter(s => ['completed', 'rejected', 'cancelled'].includes(s.status)), [swaps]);
 
-  // Update handler is the same (and perfect)
   const handleUpdateRequest = async (swapId, newStatus) => {
     try {
       const res = await fetch(`/api/swaps/${swapId}`, {
@@ -77,6 +82,32 @@ export default function MyMatches() {
       toast.error(err.message);
     }
   };
+  
+  const handleChatClick = async (otherUser) => {
+      try {
+          const res = await fetch('/api/conversations', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ otherUserId: otherUser._id })
+          });
+          const data = await res.json();
+          if (data.success) {
+              // On success, navigate to the messages page and pass the conversation data
+              navigate('/dashboard/messages', { state: { activeConversation: data.data } });
+          } else {
+              throw new Error(data.message || "Failed to start conversation.");
+          }
+      } catch (err) {
+          toast.error(err.message);
+          console.error(err);
+      }
+  };
+
+  const unreadRequestCount = useMemo(() => 
+        swaps.filter(s => s.receiver._id === loggedInUser.id && s.status === 'pending' && !s.isRead).length
+    , [swaps, loggedInUser]);
+    
 
   const tabClass = (tab) => `px-4 sm:px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 focus:outline-none ${activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 font-semibold" : "text-gray-500 hover:text-gray-800"}`;
 
@@ -86,21 +117,13 @@ export default function MyMatches() {
 
     switch (activeTab) {
       case "Recommended":
-        return users.length > 0 ? users.map(user => 
-          <RecommendedCard key={user.id} user={user} onSendRequest={setActiveModal} />
-        ) : <EmptyState tab="Recommended" />;
+        return users.length > 0 ? users.map(user => <RecommendedCard key={user.id} user={user} onSendRequest={setActiveModal} />) : <EmptyState tab="Recommended" />;
       case "Active Swaps":
-        return activeSwaps.length > 0 ? activeSwaps.map(swap => 
-          <ActiveSwapCard key={swap._id} swap={swap} currentUser={loggedInUser} />
-        ) : <EmptyState tab="Active Swaps" />;
+        return activeSwaps.length > 0 ? activeSwaps.map(swap => <ActiveSwapCard key={swap._id} swap={swap} currentUser={loggedInUser} onChat={handleChatClick} />) : <EmptyState tab="Active Swaps" />;
       case "Requests":
-        return pendingRequests.length > 0 ? pendingRequests.map(req => 
-          <RequestCard key={req._id} req={req} currentUser={loggedInUser} onUpdate={handleUpdateRequest} />
-        ) : <EmptyState tab="Requests" />;
+        return pendingRequests.length > 0 ? pendingRequests.map(req => <RequestCard key={req._id} req={req} currentUser={loggedInUser} onUpdate={handleUpdateRequest} />) : <EmptyState tab="Requests" />;
       case "History":
-        return swapHistory.length > 0 ? swapHistory.map(h => 
-          <HistoryCard key={h._id} h={h} currentUser={loggedInUser} />
-        ) : <EmptyState tab="History" />;
+        return swapHistory.length > 0 ? swapHistory.map(h => <HistoryCard key={h._id} h={h} currentUser={loggedInUser} />) : <EmptyState tab="History" />;
       default: return null;
     }
   };
@@ -111,20 +134,12 @@ export default function MyMatches() {
       <p className="text-gray-500">Manage your skill exchange connections.</p>
       <div className="border-b border-gray-200"><nav className="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto">{tabs.map(tab => <button key={tab} onClick={() => setActiveTab(tab)} className={tabClass(tab)}>{tab}</button>)}</nav></div>
       <div className="space-y-6">{renderContent()}</div>
-
-      {/* --- ADDED: Conditionally render the RequestModal --- */}
-      {activeModal && (
-        <RequestModal
-          isOpen={!!activeModal}
-          onClose={() => setActiveModal(null)}
-          userToSwapWith={activeModal}
-        />
-      )}
+      {activeModal && <RequestModal isOpen={!!activeModal} onClose={() => setActiveModal(null)} userToSwapWith={activeModal} />}
     </div>
   );
 }
 
-// --- Helper Components (Styled to match your screenshots) ---
+// --- Helper Components ---
 
 const RecommendedCard = ({ user, onSendRequest }) => (
   <div className="bg-white rounded-lg p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm hover:shadow-lg transition duration-300 border">
@@ -148,24 +163,15 @@ const RecommendedCard = ({ user, onSendRequest }) => (
   </div>
 );
 
-const ActiveSwapCard = ({ swap, currentUser }) => {
+const ActiveSwapCard = ({ swap, currentUser, onChat }) => {
   const otherUser = swap.requester._id === currentUser.id ? swap.receiver : swap.requester;
-  
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm border">
       <h2 className="text-lg font-bold text-gray-800">{otherUser.name}</h2>
       <p className="text-gray-600 mt-2 font-medium">{swap.skillOffered} ↔ {swap.skillWanted}</p>
-      <p className="text-sm text-gray-500 mt-2">Next: Tomorrow, 3:00 PM</p>
-      <p className="text-sm text-gray-500">Progress: 3/6 sessions</p>
       <div className="flex gap-2 mt-4">
-        <button className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition">Chat</button>
-        
-        <Link 
-          to={`/dashboard/swaps/${swap._id}`} 
-          className="bg-gray-200 text-gray-700 px-4 py-2 text-sm rounded-lg hover:bg-gray-300 transition text-center"
-        >
-          View Details
-        </Link>
+        <button onClick={() => onChat(otherUser)} className="bg-blue-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition">Chat</button>
+        <Link to={`/dashboard/swaps/${swap._id}`} className="bg-gray-200 text-gray-700 px-4 py-2 text-sm rounded-lg hover:bg-gray-300 transition text-center">View Details</Link>
       </div>
     </div>
   );
@@ -184,14 +190,12 @@ const RequestCard = ({ req, currentUser, onUpdate }) => {
           <div className="flex gap-2 mt-4">
             <button onClick={() => onUpdate(req._id, 'accepted')} className="bg-green-500 text-white px-4 py-2 text-sm rounded-lg hover:bg-green-600 transition">Accept</button>
             <button onClick={() => onUpdate(req._id, 'rejected')} className="bg-red-500 text-white px-4 py-2 text-sm rounded-lg hover:bg-red-600 transition">Decline</button>
-            <button className="bg-gray-200 text-gray-700 px-4 py-2 text-sm rounded-lg hover:bg-gray-300 transition">Message</button>
           </div>
         )}
       </div>
     );
 };
 
-// --- NEW: A more detailed component for swap history ---
 const HistoryCard = ({ h, currentUser }) => {
   const otherUser = h.requester._id === currentUser.id ? h.receiver : h.requester;
   const statusColors = {
@@ -206,11 +210,10 @@ const HistoryCard = ({ h, currentUser }) => {
         <span className={`px-3 py-1 text-xs font-bold rounded-full ${statusColors[h.status]}`}>{h.status}</span>
       </div>
       <p className="text-gray-600 mt-2 font-medium">{h.skillOffered} ↔ {h.skillWanted}</p>
-      <p className="text-sm text-gray-500 mt-1">Completed on: {new Date(h.updatedAt).toLocaleDateString()}</p>
+      <p className="text-sm text-gray-500 mt-1">Finished on: {new Date(h.updatedAt).toLocaleDateString()}</p>
     </div>
   );
 };
-
 
 const EmptyState = ({ tab }) => (
     <div className="col-span-full bg-white rounded-lg p-10 shadow-sm flex flex-col items-center justify-center gap-4 text-center border">

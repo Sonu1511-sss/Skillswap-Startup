@@ -84,7 +84,21 @@ const UserSchema = new mongoose.Schema({
   learningHours: {
     type: Number,
     default: 0,
-  }
+  },
+   points: {
+    type: Number,
+    default: 0,
+  },
+  level: {
+    type: Number,
+    default: 1,
+  },
+  // This will store a list of achievements the user has earned
+  unlockedAchievements: [{
+    achievementId: { type: String, required: true },
+    unlockedAt: { type: Date, default: Date.now }
+  }],
+
 }, { timestamps: true });
 
 // A virtual property to calculate average rating on the fly

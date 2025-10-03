@@ -14,14 +14,13 @@ export default function DashboardWelcome() {
 
   const { user: loggedInUser } = useContext(AuthContext);
 
-  // --- THIS IS THE FIX: We need to fill in this useEffect ---
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true); 
         const res = await fetch('/api/users', {
           method: 'GET',
-          credentials: 'include', // Sends the login cookie
+          credentials: 'include', 
         });
 
         if (!res.ok) {
@@ -31,20 +30,19 @@ export default function DashboardWelcome() {
 
         const data = await res.json();
         if (data.success) {
-          setUsers(data.data); // Put the fetched users into our state
+          setUsers(data.data); 
         }
       } catch (err) {
         setError(err.message);
         console.error("Error fetching users:", err);
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false); 
       }
     };
 
     fetchUsers();
-  }, []); // The empty [] ensures this runs only once.
+  }, []); 
 
-  // --- FILLED IN THE LOADING AND ERROR UI ---
   if (loading) {
     return <div className="p-6 text-center text-gray-500">Loading user profiles...</div>;
   }

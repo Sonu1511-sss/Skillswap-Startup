@@ -9,16 +9,33 @@ export default function ProfilePage() {
   const { user, login } = useContext(AuthContext);
 
   const handleUpdateProfile = async (editedProfile, imageFile) => {
-    const profileDataToSend = editedProfile;
-
     try {
+      const formData = new FormData();
+
+      formData.append('name', editedProfile.name);
+      formData.append('location', editedProfile.location || '');
+      formData.append('github', editedProfile.github || '');
+      formData.append('linkedin', editedProfile.linkedin || '');
+
+  
+      if (Array.isArray(editedProfile.skillsOffered)) {
+        editedProfile.skillsOffered.forEach(skill => formData.append('skillsOffered[]', skill));
+      }
+      if (Array.isArray(editedProfile.skillsWanted)) {
+        editedProfile.skillsWanted.forEach(skill => formData.append('skillsWanted[]', skill));
+      }
+      if (Array.isArray(editedProfile.availability)) {
+        editedProfile.availability.forEach(item => formData.append('availability[]', item));
+      }
+
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
       const res = await fetch('/api/users/profile', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         credentials: 'include',
-        body: JSON.stringify(profileDataToSend),
+        body: formData,
       });
 
       const data = await res.json();
@@ -28,7 +45,7 @@ export default function ProfilePage() {
       }
 
       toast.success(data.message);
-      login(data.data);
+      login(data.data); 
 
     } catch (error) {
       toast.error(error.message);

@@ -38,6 +38,10 @@ const SkillSwapSchema = new mongoose.Schema({
     enum: ['pending', 'accepted', 'rejected', 'completed', 'cancelled'],
     default: 'pending',
   },
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt
+  isRead: {
+    type: Boolean,
+    default: false,
+  },
+}, { timestamps: true }); 
 
 export default mongoose.model('SkillSwap', SkillSwapSchema);

@@ -1,23 +1,63 @@
 // src/controllers/userController.js
 import User from '../models/UserModel.js';
-
+import cloudinary from '../config/cloudinary.js'; // 1. Import Cloudinary config
+import DatauriParser from 'datauri/parser.js'; // 2. Import DataURI
+import path from 'path';
 
  // -------------------------------- Get All user Dashboard-------------------------------
 export const getAllUsers = async (req, res) => {
   try {
     const loggedInUserId = req.user.id;
-    const users = await User.find({ _id: { $ne: loggedInUserId } }).select('-password');
+    const { skillsWanted: loggedInUserSkillsWanted } = req.user;
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 15;
+    const skip = (page - 1) * limit;
+
+    let users;
+    let totalUsers;
+
+    if (loggedInUserSkillsWanted && loggedInUserSkillsWanted.length > 0) {
+      const matchQuery = {
+        skillsOffered: { $in: loggedInUserSkillsWanted },
+        _id: { $ne: loggedInUserId }
+      };
+      
+      totalUsers = await User.countDocuments(matchQuery);
+      users = await User.find(matchQuery)
+        .select('-password')
+        .sort({ createdAt: -1 }) 
+        .limit(limit)
+        .skip(skip);
+    }
+
+    if (!users || users.length === 0) {
+      console.log("No specific matches found. Falling back to showing all users.");
+      const allUsersQuery = { _id: { $ne: loggedInUserId } };
+      totalUsers = await User.countDocuments(allUsersQuery);
+      users = await User.find(allUsersQuery)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip);
+    }
 
     res.status(200).json({
       success: true,
       count: users.length,
       data: users,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalUsers / limit),
+      }
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error in getAllUsers:", error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
 
 // ----------------------------------Get UserByID-------------------------------
 
@@ -42,25 +82,41 @@ export const getUserById  = async (req, res) => {
 
 
 //--------------------------Update Profile------------------------------------------------------
+
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, location, skillsOffered, skillsWanted, availability, profilePicture ,github, linkedin  } = req.body;
+    // Text data now comes from req.body
+    const { name, location, skillsOffered, skillsWanted, availability, github, linkedin } = req.body;
 
     const user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
-    user.name = name || user.name;
-    user.location = location || user.location;
-    user.skillsOffered = skillsOffered || user.skillsOffered;
-    user.skillsWanted = skillsWanted || user.skillsWanted;
-    user.availability = availability || user.availability;
-    user.profilePicture = profilePicture || user.profilePicture;
-    user.github = github || user.github;
-    user.linkedin = linkedin || user.linkedin;
+
+    // --- NEW IMAGE UPLOAD LOGIC ---
+    if (req.file) {
+      const parser = new DatauriParser();
+      // Format the buffer from multer into a data URI
+      const dataUri = parser.format(path.extname(req.file.originalname).toString(), req.file.buffer);
+      
+      // Upload the image to Cloudinary
+      const result = await cloudinary.uploader.upload(dataUri.content, {
+        folder: "skillswap_profiles" // Optional: organize uploads in a folder
+      });
+      
+      // Save the public URL from Cloudinary to the user profile
+      user.profilePicture = result.secure_url;
+    }
+
+    // Update text fields
+    user.name = name ?? user.name;
+    user.location = location ?? user.location;
+    user.skillsOffered = skillsOffered ?? user.skillsOffered;
+    user.skillsWanted = skillsWanted ?? user.skillsWanted;
+    user.availability = availability ?? user.availability;
+    user.github = github ?? user.github;
+    user.linkedin = linkedin ?? user.linkedin;
 
     const updatedUser = await user.save();
     
@@ -73,7 +129,7 @@ export const updateUserProfile = async (req, res) => {
       data: userResponse,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating profile:", error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

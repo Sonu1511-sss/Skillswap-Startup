@@ -2,26 +2,23 @@
 
 import SkillSwap from '../models/SkillSwapModel.js';
 import User from '../models/UserModel.js';
+import { checkAchievements } from '../services/achievementService.js';
 
-//----------------------- Create new Swap loged in user , GET /api/swaps,  Private  -----------------------
+
+//----------------------- Create new Swap loged in user  -----------------------
 
 export const createSwapRequest = async (req, res) => {
   try {
     const { receiverId, skillOffered, skillWanted, message, preferredTime } = req.body;
-    const requesterId = req.user.id;      // Get the logged-in user's ID from authMiddleware
+    const requesterId = req.user.id;
 
-
-    // --------- Validation ------
+    // --- Validation logic is the same and correct ---
     if (!receiverId || !skillOffered || !skillWanted || !message) {
       return res.status(400).json({ success: false, message: 'Please provide all required fields.' });
     }
-
-    // A user cannot send a swap request to themselves
     if (requesterId === receiverId) {
       return res.status(400).json({ success: false, message: 'You cannot swap skills with yourself.' });
     }
-
-    // Check if the receiver exists
     const receiverExists = await User.findById(receiverId);
     if (!receiverExists) {
       return res.status(404).json({ success: false, message: 'The user you are trying to swap with does not exist.' });
@@ -37,6 +34,22 @@ export const createSwapRequest = async (req, res) => {
     });
 
     const savedSwap = await newSwap.save();
+    
+    // --- THIS IS THE NEW REAL-TIME NOTIFICATION PART ---
+    // 1. Get the real-time server objects from the request
+    const { io, userSocketMap } = req;
+
+    // 2. Find the socket ID of the user who is RECEIVING the request
+    const receiverSocketId = userSocketMap[savedSwap.receiver.toString()];
+
+    // 3. If the receiver is currently online, send them a notification
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newSwapRequest", {
+        message: `You have a new swap request from ${req.user.name}!`,
+        swapId: savedSwap._id,
+      });
+      console.log(`Notification sent to receiver ${savedSwap.receiver.toString()}`);
+    }
 
     res.status(201).json({
       success: true,
@@ -49,7 +62,8 @@ export const createSwapRequest = async (req, res) => {
   }
 };
 
-//-------------- Get all swaps related to the logged-in user , GET /api/swaps/me,  Private-----------------------
+
+//-------------- Get all swaps related to the logged-in user  -----------------------
 
 export const getMySwaps = async (req, res) => {
   try {
@@ -73,7 +87,7 @@ export const getMySwaps = async (req, res) => {
 };
 
 
-//-----------------Update the status of a swap request (accept, reject, etc.),PUT /api/swaps/:id,Private-----------------------
+//-----------------Update the status of a swap request ------------------------------
 
 export const updateSwapStatus = async (req, res) => {
   try {
@@ -98,25 +112,37 @@ export const updateSwapStatus = async (req, res) => {
       if (swap.receiver.toString() !== userId) {
         return res.status(403).json({ success: false, message: 'You are not authorized to perform this action.' });
       }
-    } 
+    }
     // Either user can cancel an accepted request
     else if (swap.status === 'accepted' && status === 'cancelled') {
-        if (swap.requester.toString() !== userId && swap.receiver.toString() !== userId) {
-            return res.status(403).json({ success: false, message: 'You are not authorized to perform this action.' });
-        }
+      if (swap.requester.toString() !== userId && swap.receiver.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'You are not authorized to perform this action.' });
+      }
     }
     // Add logic here later for 'completed' if needed
     else if (swap.status === 'accepted' && status === 'completed') {
-        // You might want to check if either user is part of the swap
-        if (swap.requester.toString() !== userId && swap.receiver.toString() !== userId) {
-            return res.status(403).json({ success: false, message: 'You are not authorized to perform this action.' });
-        }
+      // You might want to check if either user is part of the swap
+      if (swap.requester.toString() !== userId && swap.receiver.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'You are not authorized to perform this action.' });
+      }
     }
     else {
       // If the transition is not allowed (e.g., trying to accept an already accepted swap), send an error
       return res.status(400).json({ success: false, message: `Cannot change status from ${swap.status} to ${status}.` });
     }
 
+     if (status === 'completed') {
+    // This part updates the 'swapsCompleted' count
+    await User.updateMany(
+      { _id: { $in: [swap.requester, swap.receiver] } },
+      { $inc: { swapsCompleted: 1 } }
+    );
+    
+    // --- NEW: Check for achievements for both users ---
+    await checkAchievements(swap.requester.toString());
+    await checkAchievements(swap.receiver.toString());
+  }
+  
     swap.status = status;
     const updatedSwap = await swap.save();
 
@@ -160,3 +186,16 @@ export const getSwapById = async (req, res) => {
   }
 };
 
+//----------------------markRequestsAsRead ---------------------
+export const markRequestsAsRead = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        await SkillSwap.updateMany(
+            { receiver: userId, isRead: false },
+            { $set: { isRead: true } }
+        );
+        res.status(200).json({ success: true, message: "All requests marked as read." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
