@@ -16,7 +16,7 @@ function DashboardLayout() {
 
     useEffect(() => {
         if (user) {
-            const socket = io("http://localhost:5000", { query: { userId: user.id } });
+            const socket = io("https://skillswap-startup-vi6l.vercel.app", { query: { userId: user.id } });
             
             // Listen for the new swap request event from the server
             socket.on("newSwapRequest", (data) => {

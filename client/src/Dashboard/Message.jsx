@@ -27,7 +27,7 @@ export default function Messages() {
   //----------------------------- Establish Socket.IO connection and set up listeners----------------------------------
   useEffect(() => {
     if (loggedInUser && activeChat) {
-      socket.current = io("http://localhost:5000", { query: { userId: loggedInUser.id } });
+      socket.current = io("https://skillswap-startup-vi6l.vercel.app", { query: { userId: loggedInUser.id } });
 
       socket.current.on("newMessage", (newMessage) => {
         if (newMessage.conversationId === activeChat._id) {
