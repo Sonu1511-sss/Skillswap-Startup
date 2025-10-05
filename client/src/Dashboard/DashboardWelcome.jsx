@@ -61,7 +61,7 @@ export default function DashboardWelcome() {
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-6 shadow-lg">
+      <div className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
         <h1 className="text-2xl md:text-3xl font-bold">Welcome, {loggedInUser?.name}!</h1>
         <p className="mt-1 text-sm text-blue-100">Discover new skills and connect with amazing learners.</p>
       </div>
@@ -70,7 +70,7 @@ export default function DashboardWelcome() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition flex flex-col items-center text-center">
-            <div className="text-blue-600 text-2xl mb-2">{stat.icon}</div>
+            <div className="text-blue-500 text-2xl mb-2">{stat.icon}</div>
             <p className="font-bold text-2xl">{stat.value}</p>
             <p className="text-gray-500 text-sm mt-1">{stat.label}</p>
           </div>

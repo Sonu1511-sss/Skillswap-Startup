@@ -147,7 +147,7 @@ export default function Schedule() {
         </div>
         <div className="flex gap-3 mt-4 sm:mt-0">
           <button className="flex items-center gap-2 border px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm font-medium"><Filter className="w-4 h-4" /> Filter</button>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition text-sm font-medium"><Plus className="w-4 h-4" /> New Session</button>
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition text-sm font-medium"><Plus className="w-4 h-4" /> New Session</button>
         </div>
       </div>
 
@@ -156,7 +156,7 @@ export default function Schedule() {
         {/* Left Column */}
         <div className="space-y-8">
           <div className="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2"><CalendarDays className="w-5 h-5 text-indigo-600" /> Calendar</h3>
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2"><CalendarDays className="w-5 h-5 text-blue-500" /> Calendar</h3>
             <div className="flex items-center justify-between mb-3 text-sm font-medium">
               <button onClick={() => changeMonth(-1)} className="text-gray-500 hover:text-gray-700">{"<"}</button>
               <span>{format(currentDate, 'MMMM yyyy')}</span>
@@ -167,7 +167,7 @@ export default function Schedule() {
               {Array.from({ length: startingDayIndex }).map((_, i) => <div key={`empty-${i}`}></div>)}
               {daysInMonth.map((day) => {
                 const isSessionDay = sessions.some(s => isSameDay(s.scheduledAt, day));
-                return (<div key={day.toString()} className={`py-2 rounded-lg cursor-pointer transition ${isToday(day) ? "bg-indigo-600 text-white font-bold shadow" : "hover:bg-gray-100"} ${isSessionDay && !isToday(day) ? 'font-bold text-indigo-700 ring-2 ring-indigo-200' : ''}`}>{format(day, 'd')}</div>);
+                return (<div key={day.toString()} className={`py-2 rounded-lg cursor-pointer transition ${isToday(day) ? "bg-blue-500 text-white font-bold shadow" : "hover:bg-gray-100"} ${isSessionDay && !isToday(day) ? 'font-bold text-indigo-700 ring-2 ring-indigo-200' : ''}`}>{format(day, 'd')}</div>);
               })}
             </div>
           </div>
@@ -282,7 +282,7 @@ const UpcomingSessionCard = ({ session, currentUser, onDeleteSession ,onUpdateSe
             </div>
             <div className="flex gap-3 mt-5">
                 <button className="flex-1 border px-3 py-2 rounded-lg text-sm hover:bg-gray-50">Message</button>
-                <a href={session.meetingLink || '#'} target="_blank" rel="noopener noreferrer" className={`flex-1 bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-indigo-700 transition ${!session.meetingLink && 'opacity-50 cursor-not-allowed'}`}>
+                <a href={session.meetingLink || '#'} target="_blank" rel="noopener noreferrer" className={`flex-1 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-indigo-700 transition ${!session.meetingLink && 'opacity-50 cursor-not-allowed'}`}>
                   <Video className="w-4 h-4" /> Join Session
                 </a>
                 <button onClick={() => onDeleteSession(session._id)} className="border border-red-200 text-red-500 p-2 rounded-lg text-sm hover:bg-red-50" title="Cancel Session">

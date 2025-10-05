@@ -66,7 +66,7 @@ const ProfileSection = ({ user, onUpdate }) => {
   return (
     <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200">
       {/* Header */}
-      <div className="text-center px-6 py-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-xl">
+      <div className="text-center px-6 py-8 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-t-xl">
         <h2 className="text-3xl font-bold text-white">Update Your Profile</h2>
         <p className="text-indigo-100 mt-2">Keep your details current to find the best skill swaps.</p>
       </div>
@@ -75,7 +75,7 @@ const ProfileSection = ({ user, onUpdate }) => {
       <div className="flex flex-col items-center p-6 -mt-16">
         <div className="relative w-28 h-28">
           <img src={previewImage || `https://ui-avatars.com/api/?name=${user.name}&background=random`} alt="Profile" className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"/>
-          <label htmlFor="imageUpload" className="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer hover:bg-indigo-700 transition"><Upload className="text-white w-4 h-4" /></label>
+          <label htmlFor="imageUpload" className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition"><Upload className="text-white w-4 h-4" /></label>
           <input type="file" id="imageUpload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
         </div>
       </div>

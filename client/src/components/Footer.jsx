@@ -1,5 +1,5 @@
-// Footer.jsx
 import { Facebook, Instagram, Linkedin, Phone } from "lucide-react";
+import SkillSwapLogo from "../assids/Skillsawp.png"; // ✅ import image from top
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,11 +12,13 @@ export default function Footer() {
         <div>
           <a href="/" className="flex items-center gap-2 mb-3">
             <img
-              src="./src/assids/Skillsawp.png"
+              src={SkillSwapLogo}
               alt="SkillSwap Logo"
               className="h-10 w-auto"
             />
-            <span className="text-xl font-bold text-white tracking-tight">SkillSwap</span>
+            <span className="text-xl font-bold text-white tracking-tight">
+              SkillSwap
+            </span>
           </a>
           <p className="text-gray-400 mb-4">
             Connecting learners worldwide through skill exchange.
@@ -25,7 +27,7 @@ export default function Footer() {
             <a href="#"><Facebook className="hover:text-white" /></a>
             <a href="#"><Instagram className="hover:text-white" /></a>
             <a href="#"><Linkedin className="hover:text-white" /></a>
-            <a href="tel:+91XXXXXXXXXX"><Phone className="hover:text-white" /></a>
+            <a href="tel:+919977413362"><Phone className="hover:text-white" /></a>
           </div>
         </div>
 
@@ -61,8 +63,17 @@ export default function Footer() {
             <li><a href="#" className="hover:text-white">Privacy</a></li>
             <li><a href="#" className="hover:text-white">Terms</a></li>
           </ul>
-          <p className="text-sm text-gray-400 mt-4">Email: hello@skillswap.com</p>
-          <p className="text-sm text-gray-400">Phone: +91-98765-43210</p>
+
+          {/* Clickable Email */}
+          <p className="text-sm text-gray-400 mt-4">
+            Email: <a href="mailto:skillswap63@gmail.com" className="hover:text-white">skillswap63@gmail.com</a>
+          </p>
+
+          {/* Clickable Phone */}
+          <p className="text-sm text-gray-400">
+            Phone: <a href="tel:+919977413362" className="hover:text-white">+91 9977413362</a>, 
+                   <a href="tel:+919302451035" className="hover:text-white"> 93024 51035</a>
+          </p>
         </div>
       </div>
 

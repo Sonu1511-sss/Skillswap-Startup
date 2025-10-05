@@ -64,13 +64,13 @@ export default function SwapDetailsPage() {
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h3 className="font-bold text-lg mb-2">You are Offering:</h3>
-            <p className="text-2xl text-blue-600 font-light">{swap.skillOffered}</p>
+            <p className="text-2xl text-blue-500 font-light">{swap.skillOffered}</p>
             <p className="text-sm text-gray-500">From: {swap.requester.name}</p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg mb-2">You are Requesting:</h3>
-            <p className="text-2xl text-indigo-600 font-light">{swap.skillWanted}</p>
+            <p className="text-2xl text-blue-500 font-light">{swap.skillWanted}</p>
             <p className="text-sm text-gray-500">From: {swap.receiver.name}</p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function SwapDetailsPage() {
         <div className="flex justify-end mt-8">
           <button 
             onClick={handleScheduleClick}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg shadow hover:bg-indigo-700 transition"
+            className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-500 transition"
           >
             <FaCalendarPlus /> Schedule a Session
           </button>

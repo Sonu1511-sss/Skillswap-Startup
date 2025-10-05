@@ -1,13 +1,12 @@
 // client/src/components/Hero.jsx
 
-import React, { useContext } from "react"; 
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
-import HeroImage from "../assids/Hero-logo.png"; 
-import { useNavigate, useOutletContext } from "react-router-dom"; 
-import { AuthContext } from "../context/AuthContext"; 
+import HeroImage from "../assids/Hero-logo.png";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Hero() {
-  
   const { user } = useContext(AuthContext);
 
   const { onLoginClick } = useOutletContext();
@@ -51,8 +50,9 @@ export default function Hero() {
               className="px-6 py-3 rounded-xl bg-white text-blue-600 font-semibold shadow-lg transition hover:shadow-xl"
               onClick={handleClick}
             >
-              Get Started
+              {user ? "Go to Dashboard" : "Get Started"}
             </motion.button>
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

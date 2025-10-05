@@ -26,7 +26,7 @@ const GettingStarted = () => {
   ];
 
   return (
-    <section className="bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500  pt-[6rem] text-center py-20">
+    <section className="bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500 pt-[6rem] text-center py-20">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <h2 className="text-3xl font-extrabold text-white drop-shadow-md">
@@ -60,9 +60,17 @@ const GettingStarted = () => {
           <p className="mt-2 text-blue-50 text-lg">
             Join our community and discover the power of collaborative learning
           </p>
-          <button className="mt-6 px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 hover:scale-105">
-            Join SkillSwap Today
-          </button>
+          
+          {/* WhatsApp Redirect Button */}
+          <a
+            href="https://chat.whatsapp.com/DIZNU8iFzXW8EvCgTJ1aMb?mode=ems_share_t"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button className="mt-6 px-8 py-4 bg-white text-blue-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 hover:scale-105">
+              Join SkillSwap Today
+            </button>
+          </a>
         </div>
       </div>
     </section>

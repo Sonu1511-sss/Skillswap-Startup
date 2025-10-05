@@ -42,7 +42,7 @@ export default function UserCard({ user, onOpenModal }) {
             {/* 4. UPDATED: Better UI for when the array is empty */}
             {user.skillsOffered && user.skillsOffered.length > 0 ? (
               user.skillsOffered.map((skill) => (
-                <span key={skill} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">{skill}</span>
+                <span key={skill} className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">{skill}</span>
               ))
             ) : (
               <p className="text-xs text-gray-400 italic">No skills offered yet.</p>
@@ -67,7 +67,7 @@ export default function UserCard({ user, onOpenModal }) {
       </div>
 
       <button
-        className="w-full mt-4 bg-blue-600 text-white font-semibold py-2 rounded-lg shadow hover:bg-blue-700 transition"
+        className="w-full mt-4 bg-blue-500 text-white font-semibold py-2 rounded-lg shadow hover:bg-blue-700 transition"
         onClick={() => onOpenModal(user)}
       >
         Request Skill Swap

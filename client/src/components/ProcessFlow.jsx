@@ -1,34 +1,57 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { CheckCircle } from "lucide-react"; // modern icon
 
 function Content() {
   return (
-    <div className="bg-white flex items-center justify-center px-4 py-12 sm:py-16 md:py-20">
-      <div className="max-w-6xl w-full flex flex-col md:flex-row items-start gap-12 md:gap-16">
+    <div className="bg-gradient-to-b from-white via-gray-50 to-gray-100 flex items-center justify-center px-6 py-14 sm:py-20">
+      <div className="max-w-7xl w-full flex flex-col md:flex-row items-start gap-12 md:gap-20">
         
         {/* Left Section - Title */}
-        <div className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-snug md:leading-tight">
-          <h1 className="mb-2">SkillSwap</h1>
-          <h1 className="mb-2 text-blue-600">Learn & Teach</h1>
-          <h1 className="mb-2">Made Easy</h1>
-          <p className="mt-4 text-base sm:text-lg md:text-xl font-normal text-gray-600 max-w-md">
-            Exchange knowledge, grow together, and connect with real learners & mentors across the world.
+        <motion.div
+          initial={{ x: -80, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          className="text-gray-900 md:w-1/2"
+        >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight drop-shadow-sm">
+            Skill<span className="text-blue-500">Swap</span>
+          </h1>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-500 mt-2">
+            Learn & Teach
+          </h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mt-2">
+            Made Easy
+          </h2>
+          <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-md leading-relaxed">
+            Exchange knowledge, grow together, and connect with real learners & mentors across the world. 
+            Unlock opportunities to <span className="font-semibold text-blue-500">learn, teach, and inspire </span>.
           </p>
-        </div>
+        </motion.div>
 
         {/* Right Section - Features */}
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 text-gray-800 text-base sm:text-lg md:text-xl font-medium w-full md:w-1/2">
+        <motion.div
+          initial={{ x: 80, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          className="flex flex-col gap-5 sm:gap-6 w-full md:w-1/2"
+        >
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={index}
-              className="flex items-start gap-4 bg-gray-100 rounded-xl p-3 sm:p-4 md:p-5 hover:bg-gray-200 transition"
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition"
             >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm sm:text-base font-bold mt-1 shadow">
-                ✓
+              <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <CheckCircle className="w-5 h-5" />
               </div>
-              <p className="flex-1">{feature}</p>
-            </div>
+              <p className="flex-1 text-gray-800 text-lg font-medium">{feature}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

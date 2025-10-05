@@ -24,7 +24,7 @@ const RecommendedCard = ({ user, onSendRequest }) => (
     {/* 2. Use the onSendRequest function in the onClick handler */}
     <button
       onClick={() => onSendRequest(user)}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow flex-shrink-0 flex items-center gap-2 justify-center"
+      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow flex-shrink-0 flex items-center gap-2 justify-center"
     >
       <FaCheckCircle /> Send Request
     </button>
