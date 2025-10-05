@@ -113,5 +113,5 @@ io.on("connection", (socket) => {
 
 // --- SERVER INITIALIZATION ---
 httpServer.listen(PORT, () => {
-  console.log(`Server & Socket.IO Started Successfully At Port No: ${PORT}`);
+  console.log(`✅ Skillswap API is running on port: ${PORT}`);
 });
