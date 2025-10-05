@@ -1,19 +1,22 @@
 import React from "react";
+import ShubhamImg from "../assids/shubham-uprade.png";
+import ChandrabhanImg from "../assids/chandrabhan.jpg";
 
 const teamMembers = [
   {
     name: "Shubham Uprade",
     role: "Full Stack Developer",
     expertise: "React, Node.js, UI/UX Design",
-    img: "./src/assids/shubham-uprade.png",
+    img: ShubhamImg,
   },
   {
     name: "Chandrabhan Gadeshwar",
     role: "Backend Developer",
     expertise: "Python, Node.js, REST APIs",
-    img: "./src/assids/chandrabhan.jpg",
+    img: ChandrabhanImg,
   },
 ];
+
 
 
 export default function AboutUs() {
