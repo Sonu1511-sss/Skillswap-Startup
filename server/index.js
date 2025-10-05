@@ -28,8 +28,7 @@ const httpServer = createServer(app);
 
 // --- Allowed Origins for CORS ---
 const allowedOrigins = [
-  "http://localhost:5173",              // local development
-  "https://skillswap-indol.vercel.app", // ✅ your live frontend (no trailing slash)
+  "https://skillswap-indol.vercel.app", // ✅ your live frontend 
 ];
 
 // --- CORS Configuration ---
